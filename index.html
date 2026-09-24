@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title data-i18n="app_title">考勤系统</title>
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script src="./static/js/i18n.js?v=1790239771"></script>
+<style>
+:root{
+  --bg:#0b1220; --card:#131c30; --card2:#0f1729; --line:#22304d; --line2:#1a2740;
+  --txt:#e6edf7; --sub:#8fa3c2; --dim:#63779a;
+  --brand:#e60012; --brand2:#ff4d4f;
+  --acc:#38bdf8; --acc2:#22d3ee;
+  --ok:#34d399; --warn:#fbbf24; --bad:#f87171;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  background:var(--bg);color:var(--txt);min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:20px 16px calc(20px + env(safe-area-inset-bottom));
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  position:relative;overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(760px 420px at 50% -12%, rgba(230,0,18,.20), transparent 62%),
+    radial-gradient(620px 380px at 108% 108%, rgba(56,189,248,.11), transparent 60%),
+    var(--bg);
+}
+
+/* ---------- 卡片 ---------- */
+.box{
+  width:100%;max-width:404px;padding:20px;border-radius:22px;
+  background:linear-gradient(180deg,rgba(21,31,52,.94),rgba(12,19,34,.97));
+  border:1px solid var(--line);
+  box-shadow:0 30px 70px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.05);
+  animation:up .45s cubic-bezier(.2,.8,.3,1) both;
+}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* ---------- 顶栏 ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:9px;min-width:0}
+.brand .logo{
+  width:32px;height:32px;border-radius:10px;flex:0 0 auto;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  color:#fff;font-weight:800;font-size:15px;box-shadow:0 8px 20px rgba(230,0,18,.42);
+}
+.brand .b1{font-size:13px;font-weight:700;letter-spacing:.6px;line-height:1.2}
+.brand .b2{font-size:10px;color:var(--dim);letter-spacing:1.4px;text-transform:uppercase;line-height:1.4}
+.lang-switch{display:inline-flex;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--card2);flex:0 0 auto}
+.lang-switch .lang-btn{background:transparent;color:var(--sub);border:none;border-radius:0;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;transition:.18s}
+.lang-switch .lang-btn.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}
+
+/* ---------- 主视觉 ---------- */
+.hero{text-align:center;margin:2px 0 20px}
+.hero .hl{
+  width:60px;height:60px;margin:0 auto 14px;border-radius:19px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  font-size:27px;font-weight:800;color:#fff;box-shadow:0 16px 40px rgba(230,0,18,.42);
+}
+.hero h1{font-size:19px;font-weight:700;letter-spacing:.5px}
+.hero-logo{height:74px;max-width:62%;object-fit:contain;display:block;margin:0 auto}
+.hero .sub{font-size:10.5px;color:var(--dim);letter-spacing:2.4px;text-transform:uppercase;margin-top:7px}
+
+/* ---------- 分段切换 ---------- */
+.seg{position:relative;display:grid;grid-template-columns:1fr 1fr;background:var(--card2);border:1px solid var(--line);border-radius:13px;padding:4px;margin-bottom:18px}
+.seg-ind{
+  position:absolute;top:4px;left:4px;width:calc(50% - 4px);height:calc(100% - 8px);border-radius:10px;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  box-shadow:0 8px 20px rgba(230,0,18,.34);transition:transform .28s cubic-bezier(.4,1.25,.5,1);
+}
+.seg.role-admin .seg-ind{transform:translateX(100%)}
+.seg-btn{
+  position:relative;z-index:1;background:none;border:none;color:var(--sub);cursor:pointer;
+  font-family:inherit;font-size:13.5px;font-weight:700;letter-spacing:.3px;padding:10px 6px;border-radius:10px;transition:color .2s;
+}
+.seg-btn.active{color:#fff}
+
+/* ---------- 表单 ---------- */
+.login-form{min-width:0}
+.inp{position:relative;margin-bottom:11px}
+.inp .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none;display:flex}
+.inp input{padding-left:42px}
+.inp.has-eye input{padding-right:44px}
+input{
+  width:100%;background:var(--card2);border:1px solid var(--line);color:var(--txt);
+  padding:13px;border-radius:12px;font-size:15px;outline:none;transition:.18s;
+  font-family:inherit;
+}
+input::placeholder{color:var(--dim)}
+input:focus{border-color:rgba(255,77,79,.75);box-shadow:0 0 0 3px rgba(230,0,18,.13)}
+.eye{
+  position:absolute;right:5px;top:50%;transform:translateY(-50%);background:none;border:none;
+  color:var(--dim);cursor:pointer;padding:8px;border-radius:9px;display:flex;transition:.18s;
+}
+.eye:hover{color:var(--sub);background:rgba(255,255,255,.05)}
+
+/* ---------- 按钮 ---------- */
+button{font-family:inherit;font-size:14px;cursor:pointer}
+.btn{
+  display:block;width:100%;border:1px solid var(--line);background:var(--card2);color:var(--txt);
+  padding:12px 14px;border-radius:12px;transition:.18s;text-align:center;text-decoration:none;
+}
+.btn.primary{
+  border:none;color:#fff;font-weight:800;font-size:16px;letter-spacing:3px;padding:15px;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  box-shadow:0 14px 32px rgba(230,0,18,.34), inset 0 1px 0 rgba(255,255,255,.25);
+}
+.btn.primary:active{transform:translateY(1px)}
+.btn.primary.busy{opacity:.72;cursor:progress;letter-spacing:1px}
+.btn.primary.busy .sp{display:inline-block}
+.sp{display:none;width:13px;height:13px;margin-right:8px;vertical-align:-1px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---------- 状态提示 ---------- */
+.status-card{
+  display:none;align-items:flex-start;gap:10px;border-radius:13px;padding:11px 13px;
+  font-size:13px;line-height:1.6;margin-top:13px;border:1px solid transparent;
+}
+.status-card.show{display:flex;animation:up .3s ease both}
+.status-card .si{
+  width:21px;height:21px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;
+  font-size:12px;font-weight:800;background:rgba(255,255,255,.13);margin-top:1px;
+}
+.status-card.bad{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.3);color:#fbc4c4}
+.status-card.bad .si{background:rgba(248,113,113,.22);color:var(--bad)}
+.status-card.info{background:rgba(56,189,248,.09);border-color:rgba(56,189,248,.26);color:#bcd7f0}
+.status-card.info .si{background:rgba(56,189,248,.2);color:var(--acc)}
+
+/* ---------- 说明 / 页脚 ---------- */
+.hint{font-size:11.5px;color:var(--dim);line-height:1.7;text-align:center;margin-top:13px}
+.foot{margin-top:16px;padding-top:13px;border-top:1px solid var(--line2);text-align:center}
+.foot a{color:var(--sub);font-size:12px;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.foot a:hover{color:var(--acc)}
+.cr{text-align:center;font-size:10.5px;color:var(--dim);letter-spacing:.6px;margin-top:11px}
+.hidden{display:none !important}
+
+@media(max-width:400px){
+  .box{padding:17px;border-radius:18px}
+  .hero-logo{height:63px}
+  .btn.primary{letter-spacing:2px;font-size:15px}
+}
+</style>
+<style>#tab-admin{display:none!important}</style>
+<script>window.ATT_API_BASE='https://attendance.heyday-global.com';function attAuthHdr(){var t=localStorage.getItem('att_token');return t?{Authorization:'Bearer '+t}:{}};</script>
+</head>
+<body>
+<div class="box">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">H</div>
+      <div class="bt">
+        <div class="b1">HEYDAY</div>
+        <div class="b2" data-i18n="app_title">考勤系统</div>
+      </div>
+    </div>
+    <div class="lang-switch" id="lang-box"></div>
+  </div>
+
+  <div class="hero">
+    <img class="hero-logo" src="./static/img/logo_white.png?v=1790240433" alt="北京盛世前程">
+    <div class="sub" data-i18n="app_title">考勤系统</div>
+  </div>
+
+  <div class="seg" id="roleSeg">
+    <span class="seg-ind"></span>
+    <button type="button" class="seg-btn active" id="tab-emp" onclick="switchTab('emp')" data-i18n="employee_login">员工登录</button>
+    <button type="button" class="seg-btn" id="tab-admin" onclick="switchTab('admin')" data-i18n="admin_login">管理员登录</button>
+  </div>
+
+  <!-- 员工 -->
+  <form class="login-form" id="form-emp" onsubmit="doLogin('emp'); return false;">
+    <div class="inp">
+      <span class="ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 9h5M8 13h3"/></svg></span>
+      <input id="emp-no" data-i18n-placeholder="employee_no" placeholder="工号" autocomplete="username" inputmode="numeric">
+    </div>
+    <div class="inp has-eye">
+      <span class="ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+      <input id="emp-pin" type="password" data-i18n-placeholder="pin" placeholder="打卡密码" autocomplete="current-password">
+      <button type="button" class="eye" onclick="togglePwd('emp-pin',this)" data-i18n-title="pwd_show"></button>
+    </div>
+    <button class="btn primary" id="btn-emp" type="submit"><span class="sp"></span><span class="lbl" data-i18n="login">登录</span></button>
+    <div class="hint" data-i18n="login_hint_emp">使用工号与打卡密码登录，随后进行人脸识别打卡</div>
+  </form>
+
+  <!-- 管理员 -->
+  <form class="login-form hidden" id="form-admin" onsubmit="doLogin('admin'); return false;">
+    <div class="inp">
+      <span class="ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg></span>
+      <input id="adm-user" data-i18n-placeholder="username" placeholder="用户名" autocomplete="username">
+    </div>
+    <div class="inp has-eye">
+      <span class="ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+      <input id="adm-pass" type="password" data-i18n-placeholder="password" placeholder="密码" autocomplete="current-password">
+      <button type="button" class="eye" onclick="togglePwd('adm-pass',this)" data-i18n-title="pwd_show"></button>
+    </div>
+    <button class="btn primary" id="btn-admin" type="submit"><span class="sp"></span><span class="lbl" data-i18n="login">登录</span></button>
+    <div class="hint" data-i18n="login_hint_admin">仅限考勤管理员使用，登录后可管理员工与打卡数据</div>
+  </form>
+
+  <div class="status-card" id="msg"></div>
+
+  <div class="foot">
+    <a href="./download.html">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
+      <span data-i18n="get_app">下载手机客户端</span>
+    </a>
+  </div>
+  <div class="cr">HEYDAY GROUP</div>
+</div>
+
+<script>
+// I18N / tr / applyI18n / setLang / renderLangSwitcher 由 /static/js/i18n.js 全局提供
+const SVG_EYE = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1.5 12S5.6 5.5 12 5.5 22.5 12 22.5 12 18.4 18.5 12 18.5 1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const SVG_EYE_OFF = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l18 18"/><path d="M10.6 10.6a3 3 0 0 0 4.2 4.2"/><path d="M9.9 5.2A11 11 0 0 1 12 5c6.4 0 10.5 7 10.5 7a18.6 18.6 0 0 1-3.3 4.1"/><path d="M6.2 6.3A18.5 18.5 0 0 0 1.5 12S5.6 19 12 19a10.9 10.9 0 0 0 4.3-.9"/></svg>';
+
+let currentTab = 'emp';
+
+function togglePwd(id, btn) {
+  const el = document.getElementById(id);
+  const show = el.type === 'password';
+  el.type = show ? 'text' : 'password';
+  btn.innerHTML = show ? SVG_EYE_OFF : SVG_EYE;
+  btn.title = tr(show ? 'pwd_hide' : 'pwd_show');
+}
+
+function switchTab(role) {
+  currentTab = role;
+  document.getElementById('tab-emp').classList.toggle('active', role === 'emp');
+  document.getElementById('tab-admin').classList.toggle('active', role === 'admin');
+  document.getElementById('roleSeg').classList.toggle('role-admin', role === 'admin');
+  document.getElementById('form-emp').classList.toggle('hidden', role !== 'emp');
+  document.getElementById('form-admin').classList.toggle('hidden', role !== 'admin');
+  clearMsg();
+  const first = document.getElementById(role === 'emp' ? 'emp-no' : 'adm-user');
+  if (first && window.matchMedia('(min-width: 820px)').matches) first.focus();
+}
+
+function clearMsg() {
+  const box = document.getElementById('msg');
+  box.className = 'status-card';
+  box.innerHTML = '';
+}
+
+function showMsg(text, isErr) {
+  const box = document.getElementById('msg');
+  box.className = 'status-card show ' + (isErr ? 'bad' : 'info');
+  box.innerHTML = '';
+  const i = document.createElement('span');
+  i.className = 'si';
+  i.textContent = isErr ? '!' : 'i';
+  const t = document.createElement('span');
+  t.className = 'st';
+  t.textContent = text || '';
+  box.appendChild(i);
+  box.appendChild(t);
+}
+
+function setBusy(btn, busy) {
+  if (!btn) return;
+  btn.disabled = !!busy;
+  btn.classList.toggle('busy', !!busy);
+  const lbl = btn.querySelector('.lbl');
+  if (lbl) lbl.textContent = tr(busy ? 'logging_in' : 'login');
+  document.querySelectorAll('#form-emp input, #form-admin input').forEach(el => { el.disabled = !!busy; });
+}
+
+async function doLogin(role) {
+  const btn = document.getElementById(role === 'emp' ? 'btn-emp' : 'btn-admin');
+  const no = document.getElementById('emp-no').value.trim();
+  const pin = document.getElementById('emp-pin').value;
+  const user = document.getElementById('adm-user').value.trim();
+  const pass = document.getElementById('adm-pass').value;
+
+  if (role === 'emp' ? (!no || !pin) : (!user || !pass)) {
+    showMsg(tr('fields_required'), true);
+    return false;
+  }
+  const body = role === 'emp'
+    ? { role: 'employee', employee_no: no, pin: pin }
+    : { role: 'admin', username: user, password: pass };
+
+  clearMsg();
+  setBusy(btn, true);
+  let data = null;
+  try {
+    const res = await fetch(window.ATT_API_BASE+'/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    data = await res.json();
+  } catch (e) {
+    setBusy(btn, false);
+    showMsg(tr('login_failed'), true);
+    return false;
+  }
+  setBusy(btn, false);
+
+  if (data && data.ok) {
+    if (role === 'emp' && data.token) {
+      try { localStorage.setItem('att_token', data.token); } catch (e) {}
+    }
+    location.href = role === 'emp' ? './employee.html' : window.ATT_API_BASE + '/admin';
+    return false;
+  }
+  showMsg(tr((data && data.code) || 'login_failed', data && data.error), true);
+  return false;
+}
+
+document.querySelectorAll('.eye').forEach(b => { b.innerHTML = SVG_EYE; });
+document.addEventListener('langchange', () => {
+  clearMsg();
+  document.querySelectorAll('.eye').forEach(b => {
+    const inp = b.previousElementSibling;
+    if (inp) b.title = tr(inp.type === 'password' ? 'pwd_show' : 'pwd_hide');
+  });
+});
+switchTab(location.pathname.indexOf('/admin') === 0 ? 'admin' : 'emp');
+renderLangSwitcher('lang-box');
+applyI18n();
+</script>
+</body>
+</html>

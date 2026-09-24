@@ -1,0 +1,129 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f0f4f8; color: #1f2937; min-height: 100vh;
+}
+a { color: inherit; text-decoration: none; }
+.hidden { display: none !important; }
+
+/* 顶部导航 */
+.navbar {
+  background: #1e3a8a; color: #fff; padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.navbar .brand { font-size: 18px; font-weight: 700; }
+.navbar .right { display: flex; align-items: center; gap: 12px; }
+.lang-btn {
+  background: rgba(255,255,255,.15); color: #fff; border: none;
+  padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 13px;
+}
+.lang-btn.active { background: #fff; color: #1e3a8a; font-weight: 700; }
+
+/* 三段式语言切换器（浅色背景，用于登录页） */
+.lang-switch { display: inline-flex; border: 1px solid #cbd5e1; border-radius: 20px; overflow: hidden; background: #f1f5f9; }
+.lang-switch .lang-btn {
+  background: transparent; color: #64748b; border: none; border-radius: 0;
+  padding: 5px 13px; font-size: 12px; font-weight: 600; cursor: pointer; transition: .15s;
+}
+.lang-switch .lang-btn.active { background: #1e3a8a; color: #fff; }
+.btn-logout {
+  background: rgba(255,255,255,.15); color: #fff; border: none;
+  padding: 5px 14px; border-radius: 8px; cursor: pointer; font-size: 13px;
+}
+.btn-logout:hover { background: rgba(255,255,255,.3); }
+
+.container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+.card {
+  background: #fff; border-radius: 12px; padding: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06); margin-bottom: 20px;
+}
+.card h3 { margin-bottom: 14px; font-size: 16px; color: #1e3a8a; }
+
+/* 表单 */
+.form-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.form-row input, .form-row select {
+  padding: 9px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none;
+}
+.form-row input:focus, .form-row select:focus { border-color: #1e3a8a; }
+.btn {
+  background: #1e3a8a; color: #fff; border: none; padding: 9px 18px;
+  border-radius: 8px; cursor: pointer; font-size: 14px;
+}
+.btn:hover { opacity: .9; }
+.btn-green { background: #16a34a; }
+.btn-red { background: #dc2626; }
+.btn-gray { background: #6b7280; }
+.btn-outline { background: #fff; color: #1e3a8a; border: 1px solid #1e3a8a; }
+.btn-sm { padding: 5px 12px; font-size: 13px; }
+
+/* 表格 */
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 9px 10px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+th { background: #f8fafc; color: #374151; font-weight: 600; white-space: nowrap; }
+tr:hover td { background: #f9fafb; }
+.badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; }
+.badge-ok { background: #dcfce7; color: #166534; }
+.badge-warn { background: #fef9c3; color: #854d0e; }
+.badge-bad { background: #fee2e2; color: #991b1b; }
+.badge-gray { background: #f3f4f6; color: #4b5563; }
+
+/* 提示 */
+.alert { padding: 12px 16px; border-radius: 10px; margin-bottom: 14px; font-size: 14px; }
+.alert-ok { background: #dcfce7; color: #166534; }
+.alert-err { background: #fee2e2; color: #991b1b; }
+.alert-info { background: #dbeafe; color: #1e40af; }
+
+/* Tabs */
+.tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.tab-btn {
+  padding: 10px 22px; border-radius: 10px; border: none; cursor: pointer;
+  background: #e5e7eb; color: #4b5563; font-size: 14px; font-weight: 600;
+}
+.tab-btn.active { background: #1e3a8a; color: #fff; }
+
+/* 员工卡片 */
+.emp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.emp-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; background: #fafbfc; }
+.emp-card .e-name { font-size: 16px; font-weight: 700; }
+.emp-card .e-meta { color: #6b7280; font-size: 13px; margin: 4px 0 10px; line-height: 1.6; }
+.emp-card .ops { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* 打卡页 */
+.punch-wrap { max-width: 620px; margin: 24px auto; padding: 0 16px; }
+.video-box { position: relative; background: #000; border-radius: 16px; overflow: hidden; }
+.video-box video { width: 100%; display: block; }
+.video-box canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.video-status {
+  position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,.65);
+  color: #fff; font-size: 12px; padding: 5px 12px; border-radius: 20px;
+}
+.punch-btns { display: flex; gap: 12px; margin: 18px 0; }
+.punch-btns .btn { flex: 1; padding: 16px; font-size: 17px; font-weight: 700; border-radius: 12px; }
+.loc-line { text-align: center; color: #4b5563; font-size: 14px; margin-bottom: 6px; }
+
+/* 登录页 */
+.login-wrap { max-width: 400px; margin: 8vh auto; padding: 0 16px; }
+.login-card { background: #fff; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,.08); }
+.login-card h2 { text-align: center; color: #1e3a8a; margin-bottom: 4px; }
+.login-card .sub { text-align: center; color: #6b7280; font-size: 13px; margin-bottom: 20px; }
+.login-tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+.login-tabs .tab-btn { flex: 1; }
+.login-form input {
+  width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px;
+  margin-bottom: 12px; font-size: 15px; outline: none;
+}
+.login-form input:focus { border-color: #1e3a8a; }
+.login-form .btn { width: 100%; padding: 13px; font-size: 16px; }
+
+/* 弹窗 */
+.modal-mask {
+  position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex;
+  align-items: center; justify-content: center; z-index: 100; padding: 16px;
+}
+.modal { background: #fff; border-radius: 16px; width: 100%; max-width: 420px; padding: 20px; }
+.modal h3 { margin-bottom: 14px; color: #1e3a8a; }
+.modal .video-box { margin-bottom: 12px; }
+.modal .ops { display: flex; gap: 10px; justify-content: flex-end; }
+
+.footer { text-align: center; color: #9ca3af; font-size: 12px; padding: 20px 0 30px; }

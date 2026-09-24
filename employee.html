@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title data-i18n="emp_title">员工打卡</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HEYDAY">
+<script src="./static/js/i18n.js?v=1790239771"></script>
+<script src="./static/js/vendor/face-api.min.js?v=1790225859"></script>
+<style>
+:root{
+  --bg:#0b1220; --card:#131c30; --card2:#0f1729; --line:#22304d; --line2:#1a2740;
+  --txt:#e6edf7; --sub:#8fa3c2; --dim:#63779a;
+  --brand:#e60012; --brand2:#ff4d4f; --brand-soft:rgba(230,0,18,.14);
+  --acc:#38bdf8; --acc2:#22d3ee;
+  --ok:#34d399; --warn:#fbbf24; --bad:#f87171;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  background:var(--bg);color:var(--txt);min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:20px 16px calc(20px + env(safe-area-inset-bottom));
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  position:relative;overflow-x:hidden;
+}
+/* 背景光晕：顶部品牌红 + 右下科技蓝，避免纯色板的单调 */
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(760px 420px at 50% -12%, rgba(230,0,18,.20), transparent 62%),
+    radial-gradient(620px 380px at 108% 108%, rgba(56,189,248,.11), transparent 60%),
+    var(--bg);
+}
+
+/* ---------- 卡片 ---------- */
+.box{
+  width:100%;max-width:428px;padding:20px;border-radius:22px;
+  background:linear-gradient(180deg,rgba(21,31,52,.94),rgba(12,19,34,.97));
+  border:1px solid var(--line);
+  box-shadow:0 30px 70px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+/* ---------- 顶栏 ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+.brand{display:flex;align-items:center;gap:9px;min-width:0}
+.brand .logo{
+  width:32px;height:32px;border-radius:10px;flex:0 0 auto;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  color:#fff;font-weight:800;font-size:15px;letter-spacing:0;
+  box-shadow:0 8px 20px rgba(230,0,18,.42);
+}
+.brand .bt{min-width:0}
+.brand .b1{font-size:13px;font-weight:700;letter-spacing:.6px;line-height:1.2}
+.brand .b2{font-size:10px;color:var(--dim);letter-spacing:1.4px;text-transform:uppercase;line-height:1.4}
+.lang-switch{display:inline-flex;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--card2);flex:0 0 auto}
+.lang-switch .lang-btn{background:transparent;color:var(--sub);border:none;border-radius:0;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;transition:.18s}
+.lang-switch .lang-btn.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}
+
+/* ---------- 安装提示 ---------- */
+.install{display:flex;align-items:center;gap:10px;background:rgba(56,189,248,.09);border:1px solid rgba(56,189,248,.3);border-radius:12px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--sub);line-height:1.55}
+.install span{flex:1;min-width:0}
+
+/* ---------- 时钟 ---------- */
+.clock{text-align:center;margin:2px 0 18px}
+.clock .t{
+  font-size:44px;line-height:1.05;font-weight:700;letter-spacing:2.5px;
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum";
+  color:#f2f7ff;text-shadow:0 0 26px rgba(120,180,255,.22);
+}
+.clock .d{font-size:12px;color:var(--sub);margin-top:7px;letter-spacing:.3px}
+.chips{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:11px}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:20px;
+  font-size:11.5px;line-height:1.5;white-space:nowrap;
+  background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.22);color:#bcd7f0;
+}
+.chip.bj{background:rgba(255,255,255,.045);border-color:var(--line);color:var(--sub)}
+.chip .k{color:var(--dim)}
+.chip svg{opacity:.7;flex:0 0 auto}
+
+/* ---------- 登录视图 ---------- */
+.lg-head{text-align:center;margin:6px 0 20px}
+.lg-head .lg-logo{
+  width:58px;height:58px;margin:0 auto 14px;border-radius:18px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  font-size:26px;font-weight:800;color:#fff;box-shadow:0 16px 38px rgba(230,0,18,.42);
+}
+.lg-head h1{font-size:19px;letter-spacing:.5px;font-weight:700}
+.lg-head .sub{font-size:11.5px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-top:6px}
+
+.inp{position:relative;margin-bottom:11px}
+.inp .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none;display:flex}
+.inp input{padding-left:41px}
+input{
+  width:100%;background:var(--card2);border:1px solid var(--line);color:var(--txt);
+  padding:13px;border-radius:12px;font-size:15px;outline:none;transition:.18s;
+}
+input::placeholder{color:var(--dim)}
+input:focus{border-color:rgba(255,77,79,.75);box-shadow:0 0 0 3px rgba(230,0,18,.13)}
+
+/* ---------- 按钮 ---------- */
+button{font-family:inherit;font-size:14px;cursor:pointer}
+.btn{
+  display:block;width:100%;border:1px solid var(--line);background:var(--card2);color:var(--txt);
+  padding:12px 14px;border-radius:12px;transition:.18s;text-align:center;text-decoration:none;
+}
+.btn:hover{border-color:var(--acc)}
+.btn.primary{
+  border:none;color:#fff;font-weight:800;font-size:16px;letter-spacing:2px;padding:15px;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  box-shadow:0 14px 32px rgba(230,0,18,.34), inset 0 1px 0 rgba(255,255,255,.25);
+}
+.btn.primary:active{transform:translateY(1px)}
+.btn.small{width:auto;padding:6px 12px;font-size:12px;border-radius:9px;letter-spacing:0}
+.btn:disabled{background:#1a2439;color:var(--dim);border-color:transparent;box-shadow:none;cursor:not-allowed;transform:none}
+
+/* 打卡主按钮 */
+.btn-punch{
+  width:100%;border:none;border-radius:16px;padding:18px;color:#fff;
+  font-size:18px;font-weight:800;letter-spacing:4px;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  box-shadow:0 16px 36px rgba(230,0,18,.36), inset 0 1px 0 rgba(255,255,255,.28);
+  transition:.18s;
+}
+.btn-punch:active{transform:translateY(1px) scale(.995);box-shadow:0 8px 20px rgba(230,0,18,.32)}
+.btn-punch:disabled{background:#1a2439;color:var(--dim);box-shadow:none;cursor:not-allowed;letter-spacing:2px}
+
+.link-btn{
+  display:block;width:100%;text-align:center;background:none;border:none;
+  color:var(--sub);font-size:12.5px;padding:12px 0 4px;
+}
+.link-btn:hover{color:var(--acc)}
+
+/* ---------- 员工信息条 ---------- */
+.who{
+  display:flex;align-items:center;gap:12px;background:var(--card2);
+  border:1px solid var(--line);border-radius:15px;padding:11px 13px;margin-bottom:13px;flex-wrap:wrap;
+}
+.who .av{
+  width:40px;height:40px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  color:#fff;font-weight:800;font-size:16px;box-shadow:0 8px 20px rgba(230,0,18,.32);
+}
+.who .meta{min-width:0;flex:1}
+.who .nm{font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who .no{font-size:11.5px;color:var(--sub);margin-top:2px;letter-spacing:.4px}
+.live{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ok);flex:0 0 auto;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live .dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2.2s ease-in-out infinite}
+.live.loading{color:var(--warn)}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(52,211,153,.4)}50%{opacity:.55;box-shadow:0 0 0 5px rgba(52,211,153,0)}}
+
+/* ---------- 摄像头取景器 ---------- */
+.cam{
+  position:relative;border-radius:18px;overflow:hidden;background:#05080f;
+  border:1px solid var(--line);margin-bottom:13px;min-height:236px;
+}
+.cam video{width:100%;height:100%;display:block;object-fit:cover;min-height:236px;transform:scaleX(-1)}
+.cam canvas{display:none}
+/* 人脸引导椭圆 */
+.cam .guide{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.cam .guide i{
+  display:block;width:51%;aspect-ratio:5/7;border-radius:50%;
+  border:2px dashed rgba(56,189,248,.5);box-shadow:inset 0 0 40px rgba(56,189,248,.06);
+}
+/* 四角取景角标 */
+.cam .cn{position:absolute;width:24px;height:24px;border:2px solid rgba(56,189,248,.85);pointer-events:none}
+.cam .cn.tl{top:11px;left:11px;border-right:0;border-bottom:0;border-radius:8px 0 0 0}
+.cam .cn.tr{top:11px;right:11px;border-left:0;border-bottom:0;border-radius:0 8px 0 0}
+.cam .cn.bl{bottom:11px;left:11px;border-right:0;border-top:0;border-radius:0 0 0 8px}
+.cam .cn.br{bottom:11px;right:11px;border-left:0;border-top:0;border-radius:0 0 8px 0}
+.cam .ov{
+  position:absolute;left:11px;bottom:11px;display:flex;align-items:center;gap:7px;
+  background:rgba(5,8,15,.72);border:1px solid rgba(255,255,255,.09);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  color:#d3e3f7;font-size:11.5px;padding:5px 11px;border-radius:20px;max-width:calc(100% - 22px);
+}
+.cam .ov .dt{width:6px;height:6px;border-radius:50%;background:var(--acc);flex:0 0 auto;animation:pulse 2.2s ease-in-out infinite}
+.cam .ov.warn .dt{background:var(--warn)} .cam .ov.bad .dt{background:var(--bad)}
+/* 识别中的扫描线 */
+.cam .scan{position:absolute;left:0;right:0;height:64px;pointer-events:none;display:none;
+  background:linear-gradient(180deg,transparent,rgba(56,189,248,.16),transparent)}
+.cam.busy .scan{display:block;animation:scan 1.5s linear infinite}
+@keyframes scan{0%{top:-64px}100%{top:100%}}
+
+/* ---------- 状态卡 ---------- */
+.status-card{
+  display:none;align-items:flex-start;gap:10px;border-radius:13px;padding:11px 13px;
+  font-size:13px;line-height:1.6;margin-bottom:12px;border:1px solid transparent;
+}
+.status-card.show{display:flex}
+.status-card .si{
+  width:21px;height:21px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;
+  font-size:12px;font-weight:800;background:rgba(255,255,255,.13);margin-top:1px;
+}
+.status-card.ok{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3);color:#a5ebd1}
+.status-card.ok .si{background:rgba(52,211,153,.22);color:var(--ok)}
+.status-card.bad{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.3);color:#fbc4c4}
+.status-card.bad .si{background:rgba(248,113,113,.22);color:var(--bad)}
+.status-card.warn{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.28);color:#f7dc9b}
+.status-card.warn .si{background:rgba(251,191,36,.22);color:var(--warn)}
+.status-card .st{min-width:0}
+
+/* ---------- 隐私 / 页脚 ---------- */
+.privacy{font-size:11px;color:var(--dim);text-align:center;margin-top:16px;line-height:1.75;padding-top:13px;border-top:1px solid var(--line2)}
+.privacy a{color:var(--acc);cursor:pointer;text-decoration:none;border-bottom:1px solid rgba(56,189,248,.35);padding-bottom:1px}
+.foot{text-align:center;margin-top:13px}
+.foot a{color:var(--dim);font-size:11.5px;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.foot a:hover{color:var(--acc)}
+
+/* ---------- 弹窗 ---------- */
+.modal{position:fixed;inset:0;background:rgba(4,8,18,.82);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.modal.show{display:flex}
+.modal .inner{
+  background:linear-gradient(180deg,#18233a,#121b2e);border:1px solid var(--line);
+  border-radius:18px;max-width:520px;width:100%;padding:24px;max-height:82vh;overflow:auto;
+  box-shadow:0 30px 70px rgba(0,0,0,.6);
+}
+.modal h2{font-size:17px;margin-bottom:6px;display:flex;align-items:center;gap:9px}
+.modal h2::before{content:"";width:4px;height:16px;border-radius:2px;background:linear-gradient(180deg,var(--brand),var(--brand2))}
+.modal p{font-size:13px;color:var(--sub);line-height:1.95;margin-top:8px;white-space:pre-line}
+.modal .actions{display:flex;gap:10px;margin-top:20px}
+.hidden{display:none !important}
+
+@media(max-width:400px){
+  .clock .t{font-size:38px;letter-spacing:1.5px}
+  .box{padding:17px;border-radius:18px}
+  .btn-punch{letter-spacing:3px;font-size:17px}
+}
+</style>
+<script>window.ATT_API_BASE='https://attendance.heyday-global.com';function attAuthHdr(){var t=localStorage.getItem('att_token');return t?{Authorization:'Bearer '+t}:{}};</script>
+</head>
+<body>
+<div class="box">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">H</div>
+      <div class="bt">
+        <div class="b1">HEYDAY</div>
+        <div class="b2" data-i18n="app_title">考勤系统</div>
+      </div>
+    </div>
+    <div class="lang-switch" id="lang-box"></div>
+  </div>
+
+  <div id="installBanner" class="install hidden">
+    <span id="installText"></span>
+    <button class="btn small primary" onclick="doInstall()" data-i18n="install_btn">安装到主屏幕</button>
+  </div>
+
+  <!-- ============ 登录 ============ -->
+  <div id="loginView">
+    <div class="lg-head">
+      <div class="lg-logo">H</div>
+      <h1 data-i18n="emp_title">员工打卡</h1>
+      <div class="sub" data-i18n="app_title">考勤系统</div>
+    </div>
+    <div class="inp">
+      <span class="ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 9h5M8 13h3"/></svg></span>
+      <input id="empNo" inputmode="numeric" data-i18n-placeholder="employee_no" placeholder="工号">
+    </div>
+    <div class="inp">
+      <span class="ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+      <input id="empPass" type="password" data-i18n-placeholder="pin" placeholder="打卡密码">
+    </div>
+    <button class="btn primary" id="btn-login" onclick="login()" data-i18n="enter_punch">进入打卡</button>
+    <div class="privacy" id="privacyLine"></div>
+  </div>
+
+  <!-- ============ 打卡 ============ -->
+  <div id="punchView" class="hidden">
+    <div class="clock">
+      <div class="t" id="clockTime">--:--:--</div>
+      <div class="d" id="clockDate"></div>
+      <div class="chips">
+        <div class="chip" id="chipTz"></div>
+        <div class="chip bj" id="chipBj"></div>
+        <div class="chip" id="chipShift"></div>
+      </div>
+    </div>
+
+    <div class="who">
+      <div class="av" id="whoAvatar">·</div>
+      <div class="meta">
+        <div class="nm" id="whoName">—</div>
+        <div class="no" id="whoNo"></div>
+      </div>
+      <div class="live" id="liveState"><span class="dot"></span><span id="liveText"></span></div>
+    </div>
+
+    <div class="cam" id="camBox">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="canvas"></canvas>
+      <div class="guide"><i></i></div>
+      <span class="cn tl"></span><span class="cn tr"></span><span class="cn bl"></span><span class="cn br"></span>
+      <div class="scan"></div>
+      <div class="ov" id="camHint"><span class="dt"></span><span id="camHintText"></span></div>
+    </div>
+
+    <div class="status-card" id="statusLine"></div>
+    <button class="btn-punch" id="btn-punch" onclick="punch()" data-i18n="punch_in">上班打卡</button>
+    <button class="link-btn" onclick="logoutEmp()" id="btn-exit" data-i18n="logout">退出</button>
+    <div class="privacy" id="privacyLine2"></div>
+  </div>
+
+  <div class="foot"><a href="/admin/login"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 8.9 19a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 5 8.9a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span data-i18n="admin_console">管理后台</span></a></div>
+</div>
+
+<!-- 隐私协议弹窗 -->
+<div class="modal" id="privacyModal">
+  <div class="inner">
+    <h2 id="privacyTitle">人脸信息隐私协议</h2>
+    <p id="privacyBody"></p>
+    <div class="actions">
+      <button class="btn primary" onclick="acceptPrivacy()" id="btn-agree" data-i18n="privacy_ok">我已阅读并同意</button>
+      <button class="btn" onclick="declinePrivacy()" id="btn-decline" data-i18n="privacy_decline">不同意，退出</button>
+    </div>
+  </div>
+</div>
+
+<!-- 覆盖下班打卡确认弹窗 -->
+<div class="modal" id="overwriteModal">
+  <div class="inner">
+    <h2 id="overwriteTitle">覆盖下班打卡？</h2>
+    <p id="overwriteBody"></p>
+    <div class="actions">
+      <button class="btn primary" id="overwriteOk" onclick="confirmOverwrite()">确认覆盖</button>
+      <button class="btn" id="overwriteCancel" onclick="cancelOverwrite()">取消</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// I18N / tr / applyI18n / setLang / renderLangSwitcher 由 /static/js/i18n.js 全局提供
+
+// ---------- 隐私协议 ----------
+const PRIVACY_BODY = {
+  zh: '1. 为完成打卡身份核验，系统将通过摄像头实时进行人脸识别。\n2. 识别过程仅在本机浏览器内提取人脸特征值用于比对，原始人脸照片不会上传、不会存储。\n3. 您的面部信息不会用于考勤以外的任何用途，也不会向任何第三方提供、出售或披露。\n4. 打卡记录仅保存工号、时间、地理位置与识别结果，用于考勤统计。\n5. 如有疑问请联系管理员。',
+  en: '1. For identity verification, the camera performs real-time face recognition.\n2. Features are extracted locally in your browser for comparison only; no facial photos are uploaded or stored.\n3. Your facial data is never used for other purposes or shared with any third party.\n4. Only employee ID, time, location and result are saved for attendance statistics.\n5. Contact the administrator if you have questions.',
+  uz: "1. Shaxsni tekshirish uchun kamera real vaqtda yuzni tanishni amalga oshiradi.\n2. Xususiyatlar faqat taqqoslash uchun brauzeringizda chiqariladi; yuz suratlari yuklanmaydi va saqlanmaydi.\n3. Yuz ma'lumotlari boshqa maqsadlarda ishlatilmaydi va uchinchi shaxslarga berilmaydi.\n4. Faqat ishchi raqami, vaqt, joylashuv va natija saqlanadi.\n5. Savollar bo'lsa administratorga murojaat qiling."
+};
+
+function renderPrivacy(){
+  const line = `<span>${tr('privacy_line')} </span><a onclick="showPrivacy()">${tr('privacy_link')}</a>`;
+  const a=document.getElementById('privacyLine'), b=document.getElementById('privacyLine2');
+  if(a) a.innerHTML = line;
+  if(b) b.innerHTML = line;
+}
+
+function showPrivacy(){
+  document.getElementById('privacyTitle').textContent = tr('privacy_title');
+  document.getElementById('privacyBody').textContent = PRIVACY_BODY[currentLang] || PRIVACY_BODY.zh;
+  document.getElementById('privacyModal').classList.add('show');
+}
+function acceptPrivacy(){
+  localStorage.setItem('att_privacy_agreed','1');
+  document.getElementById('privacyModal').classList.remove('show');
+  if(window._pendingAutoLogin && currentEmp){ enterPunchView(currentEmp); }
+}
+function declinePrivacy(){ document.getElementById('privacyModal').classList.remove('show'); logoutEmp(); }
+
+if(!localStorage.getItem('att_privacy_agreed')){
+  setTimeout(showPrivacy, 600);
+}
+
+// ---------- 状态 ----------
+let currentEmp=null;
+let stream=null;
+let useTinyLM=true;      // 是否使用 tiny 关键点模型（更快）
+let punchState='in';     // in | out | done
+
+function renderPunchBtn(){
+  const btn=document.getElementById('btn-punch');
+  if(!btn) return;
+  // 当日两次已满时按钮仍可点击：再打卡会询问是否覆盖最后一次下班打卡
+  if(punchState==='done'){ btn.textContent=tr('punch_again'); btn.disabled=false; }
+  else { btn.textContent = punchState==='out'? tr('punch_out') : tr('punch_in'); btn.disabled=false; }
+}
+
+// 语言切换后刷新动态文案
+document.addEventListener('langchange', ()=>{
+  renderPrivacy(); renderPunchBtn(); renderTzChips(currentEmp);
+  renderCameraHint(); tickClock();
+  if(_pendingOverwrite) renderOverwriteModal();   // 覆盖弹窗开着时同步切换语言
+  // live 状态文案也要跟随语言
+  const lt=document.getElementById('liveText');
+  if(lt){
+    const live=document.getElementById('liveState');
+    lt.textContent = (live && live.classList.contains('loading')) ? tr('loading') : tr('model_ready');
+  }
+});
+
+/* ---------- 时区口径：同时给出 UTC 偏移与「比北京快/慢 N 小时」两种基准 ---------- */
+function renderTzChips(emp){
+  const tz=document.getElementById('chipTz'), bj=document.getElementById('chipBj'), sh=document.getElementById('chipShift');
+  if(!tz) return;
+  if(!emp){ tz.textContent=''; if(bj) bj.textContent=''; if(sh) sh.textContent=''; return; }
+  const diff = bjDiffText(emp.bj_diff);
+  tz.textContent = (emp.tz_label || emp.timezone)
+    + (emp.tz_offset ? ' · ' + emp.tz_offset : '')
+    + (diff ? ' · ' + diff : '');
+  // 非中国时区才补一条北京时间，中国员工看到两条重复信息反而干扰
+  if(bj){
+    if(emp.bj_diff){ bj.textContent = tr('bj_time') + ' ' + fmtTime(_utcMs(), 480); bj.classList.remove('hidden'); }
+    else { bj.textContent=''; bj.classList.add('hidden'); }
+  }
+  if(sh){
+    if(emp.work_start && emp.work_end){
+      sh.textContent = tr('time_plan') + ' ' + String(emp.work_start).slice(0,5) + '–' + String(emp.work_end).slice(0,5);
+    } else { sh.textContent=''; }
+  }
+}
+
+/* 兼容旧调用名（外部若引用过 renderTzLine 仍可用） */
+const renderTzLine = renderTzChips;
+
+// ---------- 大号时钟：按员工所在时区走，而不是手机本地时区 ----------
+let _clockTimer=null;
+let _empOffset=480;      // 员工所在时区相对 UTC 的分钟偏移
+const _LANG_LOCALE = { zh:'zh-CN', en:'en-US', uz:'uz-UZ' };
+
+function _utcMs(){ const n=new Date(); return n.getTime() + n.getTimezoneOffset()*60000; }
+function _pad2(n){ return String(n).padStart(2,'0'); }
+function fmtTime(utcMs, offsetMin){
+  const d=new Date(utcMs + offsetMin*60000);
+  return _pad2(d.getUTCHours())+':'+_pad2(d.getUTCMinutes())+':'+_pad2(d.getUTCSeconds());
+}
+function tickClock(){
+  const el=document.getElementById('clockTime');
+  if(!el) return;
+  const utcMs=_utcMs();
+  el.textContent = fmtTime(utcMs, _empOffset);
+  const dEl=document.getElementById('clockDate');
+  if(dEl){
+    try{
+      dEl.textContent = new Date(utcMs + _empOffset*60000).toLocaleDateString(
+        _LANG_LOCALE[currentLang] || 'zh-CN',
+        { timeZone:'UTC', year:'numeric', month:'long', day:'numeric', weekday:'long' });
+    }catch(e){ dEl.textContent=''; }
+  }
+  const bj=document.getElementById('chipBj');
+  if(bj && currentEmp && currentEmp.bj_diff){ bj.textContent = tr('bj_time') + ' ' + fmtTime(utcMs, 480); }
+}
+function startClock(emp){
+  _empOffset = 480 + (Number(emp && emp.bj_diff) || 0);   // 北京 = UTC+8，再叠加相对北京的分钟差
+  if(_clockTimer) clearInterval(_clockTimer);
+  tickClock();
+  _clockTimer=setInterval(tickClock, 1000);
+}
+function stopClock(){ if(_clockTimer){ clearInterval(_clockTimer); _clockTimer=null; } }
+
+// ---------- 摄像头提示条 ----------
+let _camState='idle';   // idle | loading | ready | busy | error
+function setCameraState(state, text){
+  _camState = state;
+  const box=document.getElementById('camHint');
+  const txt=document.getElementById('camHintText');
+  const cam=document.getElementById('camBox');
+  if(txt) txt.textContent = text || '';
+  if(box){
+    box.className = 'ov' + (state==='error' ? ' bad' : (state==='loading'||state==='busy' ? ' warn' : ''));
+  }
+  if(cam) cam.classList.toggle('busy', state==='busy');
+}
+function renderCameraHint(){
+  const map={ idle:tr('cam_align'), loading:tr('loading_model'), ready:tr('model_ready'),
+              busy:tr('recognizing'), error:tr('camera_error') };
+  setCameraState(_camState, map[_camState]);
+}
+
+function enterPunchView(emp){
+  document.getElementById('loginView').classList.add('hidden');
+  document.getElementById('punchView').classList.remove('hidden');
+  const nm=(emp.name||'').trim();
+  document.getElementById('whoAvatar').textContent = nm ? nm.charAt(0).toUpperCase() : '·';
+  document.getElementById('whoName').textContent = nm || '—';
+  document.getElementById('whoNo').textContent = emp.employee_no || '';
+  renderTzChips(emp);
+  startClock(emp);
+  renderPrivacy();
+  renderPunchBtn();
+  renderCameraHint();
+  const live=document.getElementById('liveState');
+  if(live) live.classList.add('loading');
+  document.getElementById('liveText').textContent = tr('loading');   // 短文案，避免挤爆信息条
+  startCamera();
+}
+
+// 人脸模型就绪后把摄像头状态条切回正常
+function markModelReady(){
+  const live=document.getElementById('liveState');
+  if(live) live.classList.remove('loading');
+  document.getElementById('liveText').textContent = tr('model_ready');
+  if(_camState==='loading' || _camState==='idle'){ setCameraState('ready', tr('model_ready')); }
+}
+
+// ---------- 免登录（30 天） ----------
+async function autoLoginByToken(){
+  const t=localStorage.getItem('att_token');
+  if(!t) return false;
+  try{
+    const r=await fetch(window.ATT_API_BASE+'/api/employee/token-auth',{method:'POST',headers:{'Content-Type':'application/json',...attAuthHdr()},body:JSON.stringify({token:t})});
+    const d=await r.json();
+    if(r.ok && d.ok){ currentEmp=d; return true; }
+    if(d.error && d.error.indexOf('过期')>=0) localStorage.removeItem('att_token');
+  }catch(e){}
+  return false;
+}
+
+async function restoreSession(){
+  try{
+    let d=null;
+    const r=await fetch(window.ATT_API_BASE+'/api/employee/me',{headers:attAuthHdr()});
+    const dd=await r.json();
+    if(r.ok && dd.ok){ d=dd; }
+    else if(await autoLoginByToken()){ d=currentEmp; }
+    if(!d) return;
+    currentEmp=d;
+    window._pendingAutoLogin=true;
+    if(localStorage.getItem('att_privacy_agreed')){ enterPunchView(currentEmp); }
+  }catch(e){}
+}
+
+async function login(){
+  const no=document.getElementById('empNo').value.trim();
+  const pass=document.getElementById('empPass').value;
+  if(!no||!pass){ setStatus(tr('fields_required'),'warn'); return; }
+  const btn=document.getElementById('btn-login');
+  if(btn) btn.disabled=true;
+  try{
+    const r=await fetch(window.ATT_API_BASE+'/api/employee/login',{method:'POST',headers:{'Content-Type':'application/json',...attAuthHdr()},body:JSON.stringify({employee_no:no,password:pass})});
+    const d=await r.json();
+    if(!r.ok || !d.ok) throw new Error(tr(d.code||'login_failed', d.error));
+    currentEmp=d;
+    if(d.token) localStorage.setItem('att_token', d.token);
+    setStatus('','');
+    enterPunchView(d);
+  }catch(e){ setStatus(e.message,'bad'); }
+  finally{ if(btn) btn.disabled=false; }
+}
+
+function logoutEmp(){
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
+  stopClock();
+  localStorage.removeItem('att_token');
+  currentEmp=null;
+  setStatus('','');
+  document.getElementById('punchView').classList.add('hidden');
+  document.getElementById('loginView').classList.remove('hidden');
+}
+
+// ---------- 摄像头 + 人脸 ----------
+async function startCamera(){
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:480},height:{ideal:360}}});
+    document.getElementById('video').srcObject=stream;
+    if(_camState==='idle' || _camState==='error'){
+      setCameraState(window._faceReady ? 'ready' : 'loading', window._faceReady ? tr('model_ready') : tr('loading_model'));
+    }
+  }catch(e){
+    // 浮层（取景器左下角）已展示完整错误，状态卡不再重复一遍
+    setCameraState('error', tr('camera_error'));
+  }
+}
+
+async function loadFaceModel(){
+  const m=window.faceapi;
+  if(!m) throw new Error('face-api load failed');
+  if(m.nets.faceRecognitionNet.params) { window._faceReady=true; return; }
+  const u='./static/face-models';
+  // 三模型并行加载，首次可明显缩短等待
+  try{
+    await Promise.all([
+      m.nets.tinyFaceDetector.loadFromUri(u),
+      m.nets.faceLandmark68TinyNet.loadFromUri(u),
+      m.nets.faceRecognitionNet.loadFromUri(u)
+    ]);
+    useTinyLM=true;
+  }catch(e){
+    // 回退到标准关键点模型
+    await m.nets.faceLandmark68Net.loadFromUri(u);
+    useTinyLM=false;
+  }
+  window._faceReady=true;
+  markModelReady();
+}
+
+// 复用一块小画布做检测，避免每帧拷贝整幅视频
+let _work=null;
+function getWorkCanvas(w,h){
+  if(!_work){ _work=document.createElement('canvas'); }
+  _work.width=w; _work.height=h;
+  return _work;
+}
+
+async function captureDescriptor(){
+  if(!window._faceReady){ setCameraState('loading', tr('loading_model')); }
+  await loadFaceModel();
+  const video=document.getElementById('video');
+  const vw=video.videoWidth||640, vh=video.videoHeight||480;
+  const W=320, H=Math.max(1, Math.round(vh/vw*W));      // 缩小到 320 宽再检测，速度快很多
+  const work=getWorkCanvas(W,H);
+  work.getContext('2d').drawImage(video,0,0,W,H);
+  const det=await window.faceapi
+    .detectSingleFace(work, new window.faceapi.TinyFaceDetectorOptions({inputSize:160, scoreThreshold:0.5}))
+    .withFaceLandmarks(useTinyLM)
+    .withFaceDescriptor();
+  if(!det) throw new Error(tr('face_not_found'));
+  return Array.from(det.descriptor);
+}
+
+// 页面打开即预加载模型（不阻塞交互）
+setCameraState('idle', '');
+renderCameraHint();
+loadFaceModel().catch(()=>{ setCameraState('error', tr('camera_error')); });
+
+async function punch(force){
+  const btn=document.getElementById('btn-punch');
+  btn.disabled=true;
+  if(force){
+    setStatus(tr('recognizing'),'warn');
+  } else {
+    setStatus(tr('recognizing'),'warn');
+    setCameraState('busy', tr('recognizing'));
+  }
+  try{
+    let descriptor=null, lat=null, lng=null;
+    if(force){
+      // 覆盖确认后复用刚刚提取的人脸特征与定位，员工不必再等一次识别
+      descriptor=_lastDescriptor;
+      if(!descriptor) throw new Error(tr('face_not_found'));
+      if(_lastPos){ lat=_lastPos.lat; lng=_lastPos.lng; }
+    } else {
+      descriptor=await captureDescriptor();
+      _lastDescriptor=descriptor;
+      try{
+        const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:8000,maximumAge:10000}));
+        lat=pos.coords.latitude; lng=pos.coords.longitude;
+      }catch(e){ /* 定位失败仍提交，由服务端校验 */ }
+      _lastPos={lat, lng};
+    }
+    const payload={descriptor,lat,lng};
+    if(force) payload.overwrite=true;
+    const r=await fetch(window.ATT_API_BASE+'/api/punch',{method:'POST',headers:{'Content-Type':'application/json',...attAuthHdr()},body:JSON.stringify(payload)});
+    const d=await r.json();
+    if(!r.ok || !d.ok){
+      // 当日两次已满：询问是否用本次打卡覆盖最后一次下班打卡
+      if(d && d.code==='already_done' && d.can_overwrite && !force){
+        setCameraState('ready', tr('model_ready'));
+        askOverwrite(d.last_out, d.rewrite_count);
+        return;
+      }
+      throw new Error(tr(d.code||'punch_fail', d.error));
+    }
+    // 判定以员工当地时间（d.time）为准；北京时间仅作备注，非中国时区才附注
+    const bj = (d.beijing && d.timezone && d.timezone!=='Asia/Shanghai')
+      ? '（'+tr('bj_time')+' '+d.beijing+'）' : '';
+    if(d.overwritten){
+      punchState='done'; renderPunchBtn();
+      setStatus(tr('overwrite_done')+' · '+tr('local_time')+' '+(d.time||'')+bj,'ok');
+    } else if(d.next==='check_out'){
+      punchState='out'; renderPunchBtn();
+      setStatus(tr('punch_ok_in')+' · '+tr('local_time')+' '+(d.time||'')+bj+'\n'+tr('please_out'),'ok');
+    } else if(d.next==='done'){
+      punchState='done'; renderPunchBtn();
+      setStatus(tr('punch_ok_out')+' · '+tr('local_time')+' '+(d.time||'')+bj,'ok');
+    } else {
+      punchState='in'; renderPunchBtn();
+      setStatus((d.type==='check_in'?tr('punch_ok_in'):tr('punch_ok_out'))
+        +' · '+tr('local_time')+' '+(d.time||'')+bj,'ok');
+    }
+    setCameraState('ready', tr('model_ready'));
+    updateTimer(d.next);
+  }catch(e){
+    setStatus(tr('punch_fail')+': '+e.message,'bad');
+    setCameraState('ready', tr('cam_align'));
+    btn.disabled = false;
+  }
+}
+
+// ---------- 覆盖最后一次下班打卡：先询问，员工确认后才覆盖 ----------
+let _lastDescriptor=null;    // 本次会话刚提取的人脸特征（覆盖时复用）
+let _lastPos=null;           // 本次会话刚取得的定位
+let _pendingOverwrite=null;  // 待确认的覆盖上下文
+
+function askOverwrite(lastOut, count){
+  _pendingOverwrite={ lastOut:lastOut||'', count:Number(count)||0 };
+  renderOverwriteModal();
+  document.getElementById('overwriteModal').classList.add('show');
+  setStatus(tr('overwrite_ask'),'warn');
+}
+
+function renderOverwriteModal(){
+  const ctx=_pendingOverwrite||{};
+  const times = (ctx.count>0) ? '\n'+tr('overwrite_times').replace('{n}', ctx.count) : '';
+  const t=document.getElementById('overwriteTitle'), b=document.getElementById('overwriteBody');
+  const ok=document.getElementById('overwriteOk'), no=document.getElementById('overwriteCancel');
+  if(t) t.textContent=tr('overwrite_title');
+  if(b) b.textContent=tr('overwrite_body').replace('{t}', ctx.lastOut||'--:--')+times;
+  if(ok) ok.textContent=tr('overwrite_ok');
+  if(no) no.textContent=tr('cancel');
+}
+
+function confirmOverwrite(){
+  document.getElementById('overwriteModal').classList.remove('show');
+  _pendingOverwrite=null;
+  punch(true);
+}
+
+function cancelOverwrite(){
+  document.getElementById('overwriteModal').classList.remove('show');
+  _pendingOverwrite=null;
+  setStatus(tr('overwrite_cancel'),'warn');
+}
+
+function updateTimer(next){
+  // 顶栏时钟已实时显示当地时间，这里仅在「等待下班打卡」时给出提示
+  const el=document.getElementById('timerLine');
+  if(!el) return;
+  if(next==='check_out'){
+    const s=setInterval(()=>{
+      const now=new Date();
+      const hm=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+      el.textContent=hm+' · '+tr('waiting_out');
+    },1000);
+    setTimeout(()=>clearInterval(s), 600000);
+  } else { if(el) el.textContent=''; }
+}
+
+/* 状态卡：图标 + 文字（文字用 textContent 写入，避免服务端返回内容被当 HTML 解析） */
+function setStatus(msg,cls){
+  const el=document.getElementById('statusLine');
+  if(!el) return;
+  el.innerHTML='';
+  if(!msg){ el.className='status-card'; return; }
+  const icons={ok:'✓', bad:'!', warn:'…'};
+  const ic=document.createElement('span'); ic.className='si'; ic.textContent=icons[cls]||'i';
+  const tx=document.createElement('span'); tx.className='st'; tx.textContent=msg;
+  el.appendChild(ic); el.appendChild(tx);
+  el.className='status-card show'+(cls?' '+cls:'');
+}
+
+// ---------- PWA：Service Worker & 安装 ----------
+function registerSW(){
+  if(!('serviceWorker' in navigator)) return;
+  /* mirror: service worker disabled */
+}
+let deferredPrompt=null;
+function setupInstall(){
+  if(window.navigator.standalone) return;
+  window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; showInstallBanner(); });
+  const isIos=/iP(hone|ad|od)/.test(navigator.userAgent) && !window.MSStream;
+  if(isIos) showInstallBanner();
+}
+function showInstallBanner(){
+  const el=document.getElementById('installBanner');
+  if(!el) return;
+  el.classList.remove('hidden');
+  const isIos=/iP(hone|ad|od)/.test(navigator.userAgent) && !window.MSStream;
+  document.getElementById('installText').textContent = isIos ? tr('install_ios') : tr('install_android');
+}
+function doInstall(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; const b=document.getElementById('installBanner'); if(b) b.classList.add('hidden'); }).catch(()=>{});
+    return;
+  }
+  alert(tr('install_hint'));
+}
+
+// ---------- 初始化 ----------
+renderLangSwitcher('lang-box');
+applyI18n();
+renderPrivacy();
+renderPunchBtn();
+registerSW();
+setupInstall();
+tickClock();
+restoreSession();
+</script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#E60012">
+<title>HEYDAY Attendance · 下载</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                 "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    background: #f7f7f7; color: #1a1a1a;
+    min-height: 100vh; padding: 20px 16px 48px;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; }
+  .lang { display: flex; justify-content: center; gap: 4px; margin-bottom: 20px; }
+  .lang button {
+    border: none; background: #eee; color: #666; font-size: 13px;
+    padding: 6px 14px; border-radius: 999px; cursor: pointer;
+  }
+  .lang button.on { background: #e60012; color: #fff; }
+  .hero { text-align: center; padding: 8px 0 20px; }
+  .hero svg { width: 92px; height: 92px; border-radius: 20px;
+              box-shadow: 0 6px 18px rgba(230,0,18,.25); }
+  .hero h1 { font-size: 22px; margin-top: 14px; letter-spacing: .3px; }
+  .hero .meta { font-size: 13px; color: #888; margin-top: 6px; }
+  .card {
+    background: #fff; border-radius: 14px; padding: 20px 18px;
+    margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .card h2 { font-size: 16px; display: flex; align-items: center; gap: 8px; }
+  .badge {
+    font-size: 11px; font-weight: 600; color: #fff; padding: 2px 8px;
+    border-radius: 999px; background: #e60012;
+  }
+  .badge.ios { background: #333; }
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: #e60012; color: #fff; text-decoration: none;
+    font-size: 16px; font-weight: 600; border-radius: 12px;
+    height: 52px; margin: 16px 0 6px;
+  }
+  .btn:active { opacity: .85; }
+  .btn.ghost { background: #fff; color: #e60012; border: 1.5px solid #e60012; }
+  ol { margin: 14px 0 0 0; list-style: none; counter-reset: s; }
+  ol li {
+    counter-increment: s; position: relative; padding: 0 0 14px 34px;
+    font-size: 14px; color: #444; line-height: 1.5;
+  }
+  ol li::before {
+    content: counter(s); position: absolute; left: 0; top: 0;
+    width: 22px; height: 22px; border-radius: 50%; background: #fdeaea;
+    color: #e60012; font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  ol li:last-child { padding-bottom: 0; }
+  .ios-hint { font-size: 13px; color: #777; margin-top: 10px; line-height: 1.5; }
+  .foot { text-align: center; font-size: 12px; color: #aaa; margin-top: 26px; }
+</style>
+<script>window.ATT_API_BASE='https://attendance.heyday-global.com';function attAuthHdr(){var t=localStorage.getItem('att_token');return t?{Authorization:'Bearer '+t}:{}};</script>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="lang">
+    <button data-l="zh" class="on">中文</button>
+    <button data-l="en">EN</button>
+    <button data-l="uz">UZ</button>
+  </div>
+
+  <div class="hero">
+    <svg viewBox="0 0 108 108" aria-hidden="true">
+      <rect width="108" height="108" rx="24" fill="#E60012"/>
+      <path d="M29,26h12v19h26v-19h12v56h-12v-19h-26v19h-12z" fill="#fff"/>
+    </svg>
+    <h1>HEYDAY Attendance</h1>
+    <p class="meta" data-k="meta"></p>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">Android</span><span data-k="dl_android"></span></h2>
+    <a class="btn" href="./static/download/heyday-attendance-1.0.1.apk?v=1790235768" download>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span data-k="dl_btn"></span>
+    </a>
+    <p class="ios-hint" data-k="admin_note"></p>
+    <ol>
+      <li data-k="s1"></li>
+      <li data-k="s2"></li>
+      <li data-k="s3"></li>
+      <li data-k="s4"></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge ios">iOS</span><span data-k="dl_ios"></span></h2>
+    <p class="ios-hint" data-k="ios_hint"></p>
+    <ol>
+      <li data-k="i1"></li>
+      <li data-k="i2"></li>
+      <li data-k="i3"></li>
+    </ol>
+    <a class="btn ghost" href="./index.html"><span data-k="dl_open"></span></a>
+  </div>
+
+  <p class="foot">HEYDAY GROUP · <span data-k="foot"></span></p>
+</div>
+
+<script>
+var T = {
+  zh: {
+    meta: "考勤打卡客户端 · v1.0.1 · Android 7.0+ · 约 40 KB",
+    dl_android: "安卓手机",
+    dl_btn: "下载安装包（APK）",
+    admin_note: "同一个 App 既能员工打卡，也能用管理员账号登录后台：查看打卡统计、添加/调整员工、上传证件照、导出 CSV。",
+    s1: "点击上面的下载按钮，等待下载完成",
+    s2: "在通知栏或浏览器「下载」里点开 APK 文件",
+    s3: "系统提示「未知来源」时，选择「允许」",
+    s4: "安装完成，打开 App 登录即可打卡（管理员选「管理员登录」页签）",
+    dl_ios: "苹果手机",
+    ios_hint: "苹果手机不提供安装包。用 Safari 的「添加到主屏幕」，就能得到和 App 一样的图标与全屏体验。",
+    i1: "用 Safari 打开登录页",
+    i2: "点击底部「分享」按钮",
+    i3: "选择「添加到主屏幕」",
+    dl_open: "打开登录页",
+    foot: "考勤打卡系统"
+  },
+  en: {
+    meta: "Attendance app · v1.0.1 · Android 7.0+ · ~40 KB",
+    dl_android: "Android phones",
+    dl_btn: "Download APK",
+    admin_note: "The same app also works for admins: sign in with your admin account to view statistics, add or edit employees, upload ID photos and export CSV.",
+    s1: "Tap the download button above and wait for it to finish",
+    s2: "Open the APK from notifications or your browser downloads",
+    s3: "When asked about unknown sources, tap Allow",
+    s4: "Install finished — open the app and log in to punch in",
+    dl_ios: "iPhone / iPad",
+    ios_hint: "iOS does not support APK install. Use Safari's Add to Home Screen for the same icon and full-screen experience.",
+    i1: "Open the login page in Safari",
+    i2: "Tap the Share button at the bottom",
+    i3: "Choose Add to Home Screen",
+    dl_open: "Open login page",
+    foot: "Attendance system"
+  },
+  uz: {
+    meta: "Davomat ilovasi · v1.0.1 · Android 7.0+ · ~40 KB",
+    dl_android: "Android telefonlar",
+    dl_btn: "APK yuklab olish",
+    admin_note: "Bir ilova ham xodim, ham administrator uchun: statistika, xodimlarni qo'shish/tahrirlash, rasm yuklash va CSV eksport.",
+    s1: "Yuqoridagi yuklab olish tugmasini bosing va tugashini kutib turing",
+    s2: "APK faylini bildirishnomalar yoki brauzer yuklamalaridan oching",
+    s3: "«Noma'lum manba» so'ralganda «Ruxsat berish»ni tanlang",
+    s4: "O'rnatish tugadi — ilovani ochib kiring va belgilang",
+    dl_ios: "iPhone / iPad",
+    ios_hint: "iOS APK o'rnatishga ruxsat bermaydi. Safaridagi «Asosiy ekranga qo'shish» xuddi ilovadek ishlaydi.",
+    i1: "Kirish sahifasini Safarida oching",
+    i2: "Pastdagi «Ulashish» tugmasini bosing",
+    i3: "«Asosiy ekranga qo'shish»ni tanlang",
+    dl_open: "Kirish sahifasini ochish",
+    foot: "Davomat tizimi"
+  }
+};
+
+function setLang(l) {
+  var d = T[l] || T.zh;
+  var els = document.querySelectorAll("[data-k]");
+  for (var i = 0; i < els.length; i++) {
+    var k = els[i].getAttribute("data-k");
+    if (d[k]) els[i].textContent = d[k];
+  }
+  var bs = document.querySelectorAll(".lang button");
+  for (var j = 0; j < bs.length; j++) {
+    bs[j].classList.toggle("on", bs[j].getAttribute("data-l") === l);
+  }
+  document.documentElement.lang = l === "zh" ? "zh" : l;
+  try { localStorage.setItem("att_dl_lang", l); } catch (e) {}
+}
+document.querySelectorAll(".lang button").forEach(function (b) {
+  b.addEventListener("click", function () { setLang(b.getAttribute("data-l")); });
+});
+var saved = "zh";
+try { saved = localStorage.getItem("att_dl_lang") || "zh"; } catch (e) {}
+setLang(saved);
+</script>
+</body>
+</html>

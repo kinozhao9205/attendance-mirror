@@ -1,0 +1,17 @@
+{
+  "name": "HEYDAY 考勤打卡",
+  "short_name": "考勤打卡",
+  "description": "HEYDAY 员工移动端人脸定位打卡",
+  "start_url": "/employee",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#070707",
+  "theme_color": "#e60012",
+  "lang": "zh-CN",
+  "icons": [
+    {"src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
