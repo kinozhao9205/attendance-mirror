@@ -177,11 +177,11 @@ button{font-family:inherit;font-size:14px;cursor:pointer}
   <form class="login-form" id="form-emp" onsubmit="doLogin('emp'); return false;">
     <div class="inp">
       <span class="ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 9h5M8 13h3"/></svg></span>
-      <input id="emp-no" data-i18n-placeholder="employee_no" placeholder="工号" autocomplete="username" inputmode="numeric">
+      <input id="emp-no" data-i18n-placeholder="employee_no" placeholder="工号" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
     </div>
     <div class="inp has-eye">
       <span class="ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
-      <input id="emp-pin" type="password" data-i18n-placeholder="pin" placeholder="打卡密码" autocomplete="current-password">
+      <input id="emp-pin" type="password" data-i18n-placeholder="pin" placeholder="打卡密码" autocomplete="current-password" inputmode="numeric" pattern="[0-9]*">
       <button type="button" class="eye" onclick="togglePwd('emp-pin',this)" data-i18n-title="pwd_show"></button>
     </div>
     <button class="btn primary" id="btn-emp" type="submit"><span class="sp"></span><span class="lbl" data-i18n="login">登录</span></button>
